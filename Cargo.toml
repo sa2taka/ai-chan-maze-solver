@@ -1,0 +1,10 @@
+[package]
+name = "ai-chan-maze-solver"
+version = "0.1.0"
+authors = ["sa2taka <sa2taka@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+image = "0.23.14"
