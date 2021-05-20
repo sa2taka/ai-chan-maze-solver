@@ -4,6 +4,8 @@ use image::DynamicImage;
 
 mod libs {
   mod const_values;
+  mod maze_cell;
+  pub mod maze_solver;
   pub mod parser;
   mod point;
 }
@@ -11,7 +13,8 @@ mod libs {
 use libs::parser;
 
 pub fn solve(image_view: &mut DynamicImage) {
-  parser::parse(image_view);
+  let cells = parser::parse(image_view);
+  println!("parse");
 }
 
 #[cfg(test)]
