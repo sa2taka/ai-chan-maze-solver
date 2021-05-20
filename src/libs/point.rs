@@ -1,4 +1,4 @@
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Point {
   pub x: u32,
   pub y: u32,
