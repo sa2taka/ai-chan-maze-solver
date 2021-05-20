@@ -10,10 +10,12 @@ mod libs {
   mod point;
 }
 
+use libs::maze_solver;
 use libs::parser;
 
 pub fn solve(image_view: &mut DynamicImage) {
-  let cells = parser::parse(image_view);
+  let maze = parser::parse(image_view);
+  let solved = maze_solver::solve(&maze);
   println!("parse");
 }
 

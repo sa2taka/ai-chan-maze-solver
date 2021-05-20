@@ -12,7 +12,7 @@ pub struct Way {
   pub bottom: bool,
   pub left: bool,
 }
-
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CellType {
   Empty,
   Left,
@@ -34,7 +34,7 @@ pub enum CellType {
 }
 
 impl CellType {
-  fn get_way(&self) -> Way {
+  pub fn get_way(&self) -> Way {
     return match self {
       Self::Empty => Way {
         top: false,
@@ -87,8 +87,8 @@ impl CellType {
       Self::RightBottom => Way {
         top: false,
         right: true,
-        bottom: false,
-        left: true,
+        bottom: true,
+        left: false,
       },
       Self::LeftRightTop => Way {
         top: true,
