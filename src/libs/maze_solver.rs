@@ -1,5 +1,4 @@
-use super::maze_cell::CellType;
-use crate::libs::maze_cell::Maze;
+use super::maze_cell::{CellType, Maze};
 use core::cmp::Ordering;
 use std::collections::BinaryHeap;
 
@@ -15,8 +14,7 @@ pub fn solve(maze: &Maze) -> Option<Vec<u32>> {
   };
   heap.push(first);
 
-  // 実質的なwhile (true)
-  while true {
+  loop {
     let entity = heap.pop().unwrap();
     let history = entity.history;
     let index = *history.last().unwrap();
