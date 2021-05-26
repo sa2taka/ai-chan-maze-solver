@@ -15,20 +15,17 @@ use libs::maze_solver;
 use libs::parser;
 use libs::solve_renderer;
 
-pub fn solve(image_view: &mut DynamicImage) {
+pub fn solve(image_view: &mut DynamicImage) -> Option<image::DynamicImage> {
   let (width, height) = image_view.dimensions();
-  let org_image = &mut DynamicImage::new_rgb16(width, height);
+  let mut org_image = DynamicImage::new_rgb16(width, height);
   let res = org_image.copy_from(image_view, 0, 0);
   let maze = parser::parse(image_view);
   let solved = maze_solver::solve(&maze);
   if solved.is_some() {
-    solve_renderer::render(org_image, &maze, solved.unwrap());
-    let res2 = org_image.save("solved1.png");
-    match (res2) {
-      Ok(_) => println!("done"),
-      Err(err) => println!("{}", err),
-    }
+    solve_renderer::render(&mut org_image, &maze, solved.unwrap());
+    return Some(org_image);
   }
+  return None;
 }
 
 #[cfg(test)]
@@ -37,6 +34,15 @@ mod tests {
   #[test]
   fn solve_test() {
     let mut img = image::open("maze_1.png").unwrap();
-    solve(&mut img);
+    let result = solve(&mut img);
+    if (result.is_some()) {
+      result.unwrap().save("solve1.png");
+    }
+
+    let mut img = image::open("maze_4.png").unwrap();
+    let result = solve(&mut img);
+    if (result.is_some()) {
+      result.unwrap().save("solve4.png");
+    }
   }
 }

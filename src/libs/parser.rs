@@ -1,7 +1,9 @@
 use crate::libs::const_values::THRESHOLD;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 
-use super::const_values::{FIREST_POINT, LEFT_CORNER, LEFT_CORNER_LIMIT, WALL_THICKNESS};
+use super::const_values::{
+  FIREST_POINT, LEFT_CORNER, LEFT_CORNER_LIMIT, MAZE_AREA_SIZE, WALL_THICKNESS,
+};
 use super::maze_cell::{CellType, Maze};
 use super::point::Point;
 
@@ -10,6 +12,17 @@ pub fn parse(img: &mut DynamicImage) -> Maze {
   binary(img);
   let wall_length = measure_wall_length(img);
   let mut diviced_cells = divide(img);
+
+  let mut y = 0;
+  for line in &diviced_cells {
+    let mut x = 0;
+    for cell in line {
+      cell.save(format!("temp/{}_{}.png", y, x));
+      x += 1;
+    }
+    y += 1;
+  }
+
   let cells = parse_to_cells(&mut diviced_cells, wall_length);
   return Maze {
     width: diviced_cells.len() as u32,
@@ -30,21 +43,21 @@ fn divide(img: &mut DynamicImage) -> Vec<Vec<DynamicImage>> {
   let maze_edge = (width - left_corner.x * 2) as f32;
   let edge = (wall_length * 2 + wall_length + road_length) as f32;
 
-  let size = (maze_edge / edge).round();
+  let size = detect_size(edge) as f32;
 
   let adjust = (maze_edge - edge * size) / size;
   let adjusted_edge = edge + adjust;
 
   let mut divided_cells: Vec<Vec<DynamicImage>> = Vec::new();
-  for y in 0..size.floor() as u32 {
+  for y in 0..size as u32 {
     let mut divided_lines: Vec<DynamicImage> = Vec::new();
-    for x in 0..size.floor() as u32 {
+    for x in 0..size as u32 {
       // u32を利用する関係で(x - 1)が-となってしまうため下記の計算式となっている
       let cell = img.crop(
-        (left_corner.x as f32 + (x as f32 * adjusted_edge)).floor() as u32,
-        (left_corner.y as f32 + (y as f32 * adjusted_edge)).floor() as u32,
-        adjusted_edge.floor() as u32,
-        adjusted_edge.floor() as u32,
+        (left_corner.x as f32 + (x as f32 * adjusted_edge)) as u32,
+        (left_corner.y as f32 + (y as f32 * adjusted_edge)) as u32,
+        adjusted_edge as u32,
+        adjusted_edge as u32,
       );
       divided_lines.push(cell);
     }
@@ -256,7 +269,7 @@ fn measure_wall_length(img: &DynamicImage) -> u32 {
   for x in (start.x + 1)..width {
     let color = img.get_pixel(x, start.y);
     if calculate_color_distance(&color, &wall_color) > THRESHOLD as f32 {
-      return x - start.x;
+      return x - start.x - 1;
     }
   }
   return 0u32;
@@ -280,7 +293,7 @@ fn binary(img: &mut DynamicImage) {
   let threshold = if base_binary < 40f32 {
     46f32
   } else {
-    base_binary - 40f32
+    base_binary - 4f32
   };
 
   for y in 0..height {
@@ -304,6 +317,18 @@ fn calc_binary_color(color: Rgba<u8>) -> f32 {
   let blue = color[2];
 
   return 0.3 * red as f32 + 0.59 * green as f32 + 0.11 * blue as f32;
+}
+
+fn detect_size(edge_size: f32) -> u32 {
+  let mut prev_diff = MAZE_AREA_SIZE as f32;
+  for i in 3..100 {
+    let diff = ((MAZE_AREA_SIZE as f32 / i as f32) - edge_size).abs();
+    if diff > prev_diff {
+      return i;
+    }
+    prev_diff = diff;
+  }
+  return 100;
 }
 
 #[derive(PartialEq, Copy, Clone)]
